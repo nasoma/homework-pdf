@@ -2,7 +2,7 @@
 
 A macOS desktop app for writing and exporting homework sheets as polished PDFs. Write in Markdown, see a live preview, and export with one keystroke.
 
-![App Screenshot](assets/screenhsot.png)
+![App Screenshot](assets/screenshot.png)
 
 ---
 
