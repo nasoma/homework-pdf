@@ -95,6 +95,7 @@ const footerTextRow        = document.getElementById('footerTextRow');
 const footerTextEl         = document.getElementById('footerText');
 const customCSSEl          = document.getElementById('customCSS');
 const orientationCtrl      = document.getElementById('orientationControl');
+const documentTitleEl      = document.getElementById('documentTitle');
 const autoDetectAnswerKeyEl= document.getElementById('autoDetectAnswerKey');
 const unwrapFenceEl        = document.getElementById('unwrapFence');
 
@@ -102,6 +103,7 @@ const unwrapFenceEl        = document.getElementById('unwrapFence');
 // Settings state
 // ─────────────────────────────────────────────
 const DEFAULT_SETTINGS = {
+  documentTitle:        '',
   pageSize:             'A4',
   orientation:          'portrait',
   fontFamily:           'Arial',
@@ -134,6 +136,7 @@ function saveSettings() {
 function getSettings() {
   const activeSegment = orientationCtrl.querySelector('.segment.active');
   return {
+    documentTitle:        documentTitleEl.value.trim(),
     pageSize:             pageSizeEl.value,
     orientation:          activeSegment ? activeSegment.dataset.value : 'portrait',
     fontFamily:           fontFamilyEl.value,
@@ -152,6 +155,7 @@ function getSettings() {
 }
 
 function applySettings(s) {
+  documentTitleEl.value          = s.documentTitle;
   pageSizeEl.value    = s.pageSize;
   fontFamilyEl.value  = s.fontFamily;
   fontSizeEl.value    = s.fontSize;
@@ -389,10 +393,12 @@ footerEnabledEl.addEventListener('change', () => {
 // Persist all settings inputs
 [
   pageSizeEl, fontFamilyEl, childFriendlyEl, footerTextEl, customCSSEl,
-  autoDetectAnswerKeyEl, unwrapFenceEl,
+  autoDetectAnswerKeyEl, unwrapFenceEl, documentTitleEl,
 ].forEach(el => {
   el.addEventListener('change', saveSettings);
 });
+
+documentTitleEl.addEventListener('input', saveSettings);
 
 // ─────────────────────────────────────────────
 // Status messages
@@ -453,6 +459,21 @@ function clearAnswerKeyPrompt() {
   statusMsg.className = 'status-message';
 }
 
+// Prepend a custom title as H1, stripping any existing first heading to avoid duplication.
+function buildWithTitle(markdown, title) {
+  if (!title) return markdown;
+  const withoutFirstHeading = markdown.replace(/^#{1,2}\s+[^\n]*\n?/, '').trimStart();
+  return `# ${title}\n\n${withoutFirstHeading}`;
+}
+
+function slugifyTitle(title) {
+  return title.toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '') || 'homework';
+}
+
 function deriveSlug(markdown) {
   for (const line of markdown.split('\n')) {
     const m = line.match(/^#\s+(.+)/);
@@ -472,9 +493,13 @@ async function handleExportBoth() {
   if (!answerKeySplit) return;
 
   const { studentMd, answersMd, fullMd } = answerKeySplit;
-  const slug = deriveSlug(fullMd);
+  const settings = getSettings();
+  const title = settings.documentTitle;
+  const slug = title ? slugifyTitle(title) : deriveSlug(fullMd);
   const studentFilename = `${slug}-student.pdf`;
   const answersFilename = `${slug}-answers.pdf`;
+  const exportStudentMd = buildWithTitle(studentMd, title);
+  const exportAnswersMd = buildWithTitle(answersMd, title);
 
   exportBtn.classList.add('loading');
   exportBtn.textContent = 'Generating…';
@@ -482,15 +507,13 @@ async function handleExportBoth() {
   statusMsg.className = 'status-message info';
 
   try {
-    const settings = getSettings();
-
-    const studentTmp = await ExportPDF(studentMd, settings);
+    const studentTmp = await ExportPDF(exportStudentMd, settings);
     if (!studentTmp) {
       showStatus('Failed to generate student PDF. Is Google Chrome installed?', 'error');
       return;
     }
 
-    const answersTmp = await ExportPDF(answersMd, settings);
+    const answersTmp = await ExportPDF(exportAnswersMd, settings);
     if (!answersTmp) {
       showStatus('Failed to generate answers PDF.', 'error');
       return;
@@ -536,14 +559,17 @@ exportBtn.addEventListener('click', async () => {
 
   try {
     const settings = getSettings();
-    const tmpPath = await ExportPDF(markdown, settings);
+    const exportMd = buildWithTitle(markdown, settings.documentTitle);
+    const tmpPath = await ExportPDF(exportMd, settings);
 
     if (!tmpPath) {
       showStatus('PDF generation failed. Is Google Chrome installed?', 'error');
       return;
     }
 
-    const filename = await SuggestedFilename(markdown);
+    const filename = settings.documentTitle
+      ? slugifyTitle(settings.documentTitle) + '.pdf'
+      : await SuggestedFilename(markdown);
     const saved = await SavePDF(tmpPath, filename);
 
     if (saved) {
