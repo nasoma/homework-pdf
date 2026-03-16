@@ -427,8 +427,9 @@ function detectAnswerKey(markdown) {
 
   const idx = markdown.search(ANSWER_KEY_RE);
   const studentMd = markdown.slice(0, idx).trimEnd();
+  const answersMd = markdown.slice(idx);
 
-  answerKeySplit = { studentMd, fullMd: markdown };
+  answerKeySplit = { studentMd, answersMd, fullMd: markdown };
   showAnswerKeyPrompt();
 }
 
@@ -470,7 +471,7 @@ function deriveSlug(markdown) {
 async function handleExportBoth() {
   if (!answerKeySplit) return;
 
-  const { studentMd, fullMd } = answerKeySplit;
+  const { studentMd, answersMd, fullMd } = answerKeySplit;
   const slug = deriveSlug(fullMd);
   const studentFilename = `${slug}-student.pdf`;
   const answersFilename = `${slug}-answers.pdf`;
@@ -489,7 +490,7 @@ async function handleExportBoth() {
       return;
     }
 
-    const answersTmp = await ExportPDF(fullMd, settings);
+    const answersTmp = await ExportPDF(answersMd, settings);
     if (!answersTmp) {
       showStatus('Failed to generate answers PDF.', 'error');
       return;
