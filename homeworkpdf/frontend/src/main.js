@@ -591,13 +591,11 @@ exportBtn.addEventListener('click', async () => {
 // ─────────────────────────────────────────────
 clearBtn.addEventListener('click', () => {
   if (!editor.value.trim()) return;
-  if (confirm('Clear the editor? This cannot be undone.')) {
-    editor.value = '';
-    renderPreview('');
-    saveEditorContent();
-    clearAnswerKeyPrompt();
-    showStatus('Editor cleared.', 'info', 2000);
-  }
+  editor.value = '';
+  renderPreview('');
+  saveEditorContent();
+  clearAnswerKeyPrompt();
+  showStatus('Editor cleared.', 'info', 2000);
 });
 
 // ─────────────────────────────────────────────
