@@ -7,3 +7,10 @@ frontend/package.json.md5
 .DS_Store
 **/.DS_Store
 projectsummary.md
+
+# Internal planning files
+changes.md
+task.md
+
+# Root-level font source directory (fonts are bundled inside homeworkpdf/)
+Google_Sans,Open_Sans,Roboto/
