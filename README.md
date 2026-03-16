@@ -1,6 +1,6 @@
 # Homework PDF
 
-A macOS desktop app for writing and exporting homework sheets as polished PDFs. Write in Markdown, see a live preview, and export with one keystroke.
+A macOS desktop app for parents and teachers who use AI to create homework sheets. Paste the Markdown output from ChatGPT, Claude, or Gemini and turn it into a print-ready PDF in seconds.
 
 ![App Screenshot](assets/screenshot.png)
 
