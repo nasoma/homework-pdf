@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Homework PDF</title>
+  <link rel="stylesheet" href="./src/style.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+
+  <!-- ══════════ TOOLBAR ══════════ -->
+  <header class="toolbar">
+    <div class="toolbar-left">
+      <span class="app-title">Homework PDF</span>
+    </div>
+
+    <div class="toolbar-right">
+      <button class="btn btn-ghost" id="clearBtn" title="Clear (⌘K)">Clear</button>
+      <button class="btn btn-secondary" id="settingsBtn" title="Settings (⌘,)">Settings</button>
+      <button class="btn btn-primary" id="exportBtn" title="Export PDF (⌘E)">Export PDF</button>
+    </div>
+  </header>
+
+  <!-- ══════════ MAIN CONTENT ══════════ -->
+  <div class="main-content">
+
+    <!-- Editor panel -->
+    <div class="panel editor-panel" id="editorPanel">
+      <div class="panel-header">
+        <span class="panel-label">Markdown</span>
+      </div>
+      <textarea
+        class="editor"
+        id="editor"
+        spellcheck="false"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        placeholder="# Homework Title&#10;&#10;Start writing your homework here..."
+      ></textarea>
+    </div>
+
+    <!-- Resizable splitter -->
+    <div class="splitter" id="splitter">
+      <div class="splitter-handle"></div>
+    </div>
+
+    <!-- Preview panel -->
+    <div class="panel preview-panel" id="previewPanel">
+      <div class="panel-header">
+        <span class="panel-label">Preview</span>
+      </div>
+      <div class="preview-scroll">
+        <div class="preview-page" id="preview">
+          <p class="preview-placeholder">Start typing to see a live preview…</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════ SETTINGS DRAWER ══════════ -->
+  <div class="settings-overlay" id="settingsOverlay"></div>
+  <aside class="settings-drawer" id="settingsDrawer" aria-hidden="true">
+    <div class="settings-header">
+      <h2 class="settings-title">Settings</h2>
+      <button class="settings-close" id="settingsClose" aria-label="Close settings">✕</button>
+    </div>
+
+    <div class="settings-body">
+
+      <div class="settings-section">
+        <h3 class="settings-section-title">Page</h3>
+
+        <div class="setting-row">
+          <label class="setting-label" for="pageSize">Page Size</label>
+          <select class="setting-select" id="pageSize">
+            <option value="A4">A4 (210 × 297 mm)</option>
+            <option value="Letter">Letter (216 × 279 mm)</option>
+            <option value="A5">A5 (148 × 210 mm)</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <label class="setting-label">Orientation</label>
+          <div class="segmented" id="orientationControl">
+            <button class="segment active" data-value="portrait">Portrait</button>
+            <button class="segment" data-value="landscape">Landscape</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3 class="settings-section-title">Typography</h3>
+
+        <div class="setting-row">
+          <label class="setting-label" for="fontFamily">Font</label>
+          <select class="setting-select" id="fontFamily">
+            <option value="Arial" selected>Arial</option>
+            <option value="Google Sans">Google Sans</option>
+            <option value="Open Sans">Open Sans</option>
+            <option value="Roboto">Roboto</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <label class="setting-label">
+            Font Size
+            <span class="setting-value-badge" id="fontSizeVal">12pt</span>
+          </label>
+          <input type="range" class="setting-range" id="fontSize" min="10" max="24" value="12"/>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3 class="settings-section-title">Margins (mm)</h3>
+
+        <div class="margins-grid">
+          <div class="margin-row">
+            <label class="margin-label">Top</label>
+            <input type="range" class="setting-range" id="marginTop" min="10" max="40" value="20"/>
+            <span class="margin-val" id="marginTopVal">20</span>
+          </div>
+          <div class="margin-row">
+            <label class="margin-label">Bottom</label>
+            <input type="range" class="setting-range" id="marginBottom" min="10" max="40" value="20"/>
+            <span class="margin-val" id="marginBottomVal">20</span>
+          </div>
+          <div class="margin-row">
+            <label class="margin-label">Left</label>
+            <input type="range" class="setting-range" id="marginLeft" min="10" max="40" value="20"/>
+            <span class="margin-val" id="marginLeftVal">20</span>
+          </div>
+          <div class="margin-row">
+            <label class="margin-label">Right</label>
+            <input type="range" class="setting-range" id="marginRight" min="10" max="40" value="20"/>
+            <span class="margin-val" id="marginRightVal">20</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3 class="settings-section-title">Options</h3>
+
+        <div class="setting-row setting-row--toggle">
+          <div>
+            <label class="setting-label" for="childFriendly">Child-Friendly Mode</label>
+            <p class="setting-hint">Larger text (≥16pt) and relaxed line spacing</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="childFriendly"/>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="setting-row setting-row--toggle">
+          <div>
+            <label class="setting-label" for="footerEnabled">Page Footer</label>
+            <p class="setting-hint">Include page numbers in the PDF</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="footerEnabled"/>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="setting-row" id="footerTextRow" style="display:none">
+          <label class="setting-label" for="footerText">Footer Text</label>
+          <input type="text" class="setting-input" id="footerText" placeholder="e.g. Year 3 Maths"/>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3 class="settings-section-title">Answer Key</h3>
+
+        <div class="setting-row setting-row--toggle">
+          <div>
+            <label class="setting-label" for="autoDetectAnswerKey">Auto-detect answer key on paste</label>
+            <p class="setting-hint">Offer to export student and answer versions separately</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="autoDetectAnswerKey" checked/>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3 class="settings-section-title">AI Cleanup</h3>
+
+        <div class="setting-row setting-row--toggle">
+          <div>
+            <label class="setting-label" for="stripPreamble">Strip conversational preamble</label>
+            <p class="setting-hint">Remove AI intro text before the first heading or list</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="stripPreamble" checked/>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="setting-row setting-row--toggle">
+          <div>
+            <label class="setting-label" for="unwrapFence">Unwrap fenced code blocks</label>
+            <p class="setting-hint">Strip triple-backtick wrappers around entire documents</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="unwrapFence" checked/>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3 class="settings-section-title">Custom CSS</h3>
+        <p class="setting-hint" style="margin-bottom: 8px">Injected into the PDF stylesheet</p>
+        <textarea
+          class="setting-textarea"
+          id="customCSS"
+          rows="5"
+          placeholder="/* e.g. h1 { color: navy; } */"
+        ></textarea>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ══════════ STATUS BAR ══════════ -->
+  <footer class="status-bar">
+    <span class="status-message" id="statusMessage"></span>
+    <span class="status-hint">⌘E Export · ⌘, Settings · ⌘K Clear</span>
+  </footer>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
