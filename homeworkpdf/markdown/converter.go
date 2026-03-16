@@ -11,20 +11,14 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
-var (
-	headingRe    = regexp.MustCompile(`^#{1,6}\s`)
-	listItemRe   = regexp.MustCompile(`^[-*+]\s`)
-	orderedRe    = regexp.MustCompile(`^\d+\.\s`)
-	excessiveNLs = regexp.MustCompile(`\n{4,}`)
-)
+var excessiveNLs = regexp.MustCompile(`\n{4,}`)
 
 // NormalizeMarkdown applies the AI-output normalisation pipeline before conversion.
-// stripPreamble removes conversational prose before the first heading/list.
 // unwrapFence strips a single triple-backtick wrapper around the entire document.
-func NormalizeMarkdown(input string, stripPreamble, unwrapFence bool) string {
+func NormalizeMarkdown(input string, unwrapFence bool) string {
 	text := input
 
-	// b) Unwrap incorrectly fenced content
+	// Unwrap incorrectly fenced content
 	if unwrapFence {
 		trimmed := strings.TrimSpace(text)
 		if strings.HasPrefix(trimmed, "```") {
@@ -40,32 +34,7 @@ func NormalizeMarkdown(input string, stripPreamble, unwrapFence bool) string {
 		}
 	}
 
-	// a) Strip conversational preamble
-	if stripPreamble {
-		lines := strings.Split(text, "\n")
-		firstIdx := -1
-		for i, line := range lines {
-			t := strings.TrimSpace(line)
-			if headingRe.MatchString(t) || listItemRe.MatchString(t) || orderedRe.MatchString(t) {
-				firstIdx = i
-				break
-			}
-		}
-		if firstIdx > 0 {
-			hasContent := false
-			for _, l := range lines[:firstIdx] {
-				if strings.TrimSpace(l) != "" {
-					hasContent = true
-					break
-				}
-			}
-			if hasContent {
-				text = strings.Join(lines[firstIdx:], "\n")
-			}
-		}
-	}
-
-	// c) Collapse 3+ consecutive blank lines into 2
+	// Collapse 3+ consecutive blank lines into 2
 	text = excessiveNLs.ReplaceAllString(text, "\n\n\n")
 
 	return text

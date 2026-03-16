@@ -32,7 +32,7 @@ func (a *App) startup(ctx context.Context) {
 // ExportPDF converts markdown to PDF and returns the temp file path.
 // The frontend should then call SavePDF with that path.
 func (a *App) ExportPDF(markdownContent string, settings pdf.Settings) string {
-	normalized := markdown.NormalizeMarkdown(markdownContent, settings.StripPreamble, settings.UnwrapFence)
+	normalized := markdown.NormalizeMarkdown(markdownContent, settings.UnwrapFence)
 	htmlBody := markdown.Convert(normalized)
 	fullHTML := pdf.BuildHTML(htmlBody, settings)
 

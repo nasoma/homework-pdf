@@ -14,6 +14,5 @@ type Settings struct {
 	FooterEnabled bool    `json:"footerEnabled"`
 	FooterText    string  `json:"footerText"`
 	CustomCSS     string  `json:"customCSS"`
-	StripPreamble bool    `json:"stripPreamble"`
 	UnwrapFence   bool    `json:"unwrapFence"`
 }

@@ -6,4 +6,6 @@ export function ExportPDF(arg1:string,arg2:pdf.Settings):Promise<string>;
 
 export function SavePDF(arg1:string,arg2:string):Promise<string>;
 
+export function SaveToDownloads(arg1:string,arg2:string):Promise<string>;
+
 export function SuggestedFilename(arg1:string):Promise<string>;

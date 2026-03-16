@@ -96,7 +96,6 @@ const footerTextEl         = document.getElementById('footerText');
 const customCSSEl          = document.getElementById('customCSS');
 const orientationCtrl      = document.getElementById('orientationControl');
 const autoDetectAnswerKeyEl= document.getElementById('autoDetectAnswerKey');
-const stripPreambleEl      = document.getElementById('stripPreamble');
 const unwrapFenceEl        = document.getElementById('unwrapFence');
 
 // ─────────────────────────────────────────────
@@ -116,7 +115,6 @@ const DEFAULT_SETTINGS = {
   footerText:           '',
   customCSS:            '',
   autoDetectAnswerKey:  true,
-  stripPreamble:        true,
   unwrapFence:          true,
 };
 
@@ -149,7 +147,6 @@ function getSettings() {
     footerText:           footerTextEl.value,
     customCSS:            customCSSEl.value,
     autoDetectAnswerKey:  autoDetectAnswerKeyEl.checked,
-    stripPreamble:        stripPreambleEl.checked,
     unwrapFence:          unwrapFenceEl.checked,
   };
 }
@@ -168,7 +165,6 @@ function applySettings(s) {
   footerTextEl.value             = s.footerText;
   customCSSEl.value              = s.customCSS;
   autoDetectAnswerKeyEl.checked  = s.autoDetectAnswerKey;
-  stripPreambleEl.checked        = s.stripPreamble;
   unwrapFenceEl.checked          = s.unwrapFence;
   footerTextRow.style.display    = s.footerEnabled ? '' : 'none';
 
@@ -181,7 +177,7 @@ function applySettings(s) {
 // AI Markdown normalisation
 // ─────────────────────────────────────────────
 function normalizeMarkdown(text, settings) {
-  // b) Unwrap incorrectly fenced content
+  // Unwrap incorrectly fenced content
   if (settings.unwrapFence) {
     const trimmed = text.trim();
     const fenceMatch = trimmed.match(/^```[^\n]*\n([\s\S]*)\n```$/);
@@ -190,26 +186,7 @@ function normalizeMarkdown(text, settings) {
     }
   }
 
-  // a) Strip conversational preamble
-  if (settings.stripPreamble) {
-    const lines = text.split('\n');
-    let firstIdx = -1;
-    for (let i = 0; i < lines.length; i++) {
-      const t = lines[i].trim();
-      if (/^#{1,6}\s/.test(t) || /^[-*+]\s/.test(t) || /^\d+\.\s/.test(t)) {
-        firstIdx = i;
-        break;
-      }
-    }
-    if (firstIdx > 0) {
-      const hasProse = lines.slice(0, firstIdx).some(l => l.trim() !== '');
-      if (hasProse) {
-        text = lines.slice(firstIdx).join('\n');
-      }
-    }
-  }
-
-  // c) Collapse 3+ blank lines into 2
+  // Collapse 3+ blank lines into 2
   text = text.replace(/\n{4,}/g, '\n\n\n');
 
   return text;
@@ -243,13 +220,16 @@ function renderPreview(markdown) {
 
 function scheduleRender() {
   clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => renderPreview(editor.value), 400);
+  debounceTimer = setTimeout(() => {
+    renderPreview(editor.value);
+    const s = getSettings();
+    if (s.autoDetectAnswerKey) detectAnswerKey(editor.value);
+  }, 400);
 }
 
 editor.addEventListener('input', () => {
   scheduleRender();
   saveSettings();
-  clearAnswerKeyPrompt();
 });
 
 // ─────────────────────────────────────────────
@@ -260,10 +240,11 @@ editor.addEventListener('paste', () => {
   setTimeout(() => {
     renderPreview(editor.value);
     saveEditorContent();
-    showStatus('Ready to export — press ⌘E', 'info', 3000);
     const s = getSettings();
     if (s.autoDetectAnswerKey) {
       detectAnswerKey(editor.value);
+    } else {
+      showStatus('Ready to export — press ⌘E', 'info', 3000);
     }
   }, 0);
 });
@@ -408,7 +389,7 @@ footerEnabledEl.addEventListener('change', () => {
 // Persist all settings inputs
 [
   pageSizeEl, fontFamilyEl, childFriendlyEl, footerTextEl, customCSSEl,
-  autoDetectAnswerKeyEl, stripPreambleEl, unwrapFenceEl,
+  autoDetectAnswerKeyEl, unwrapFenceEl,
 ].forEach(el => {
   el.addEventListener('change', saveSettings);
 });
@@ -626,9 +607,11 @@ EventsOn('pdf:error', (msg) => {
 // Initialise on load
 // ─────────────────────────────────────────────
 function init() {
-  applySettings(loadSettings());
+  const s = loadSettings();
+  applySettings(s);
   editor.value = loadEditorContent();
   renderPreview(editor.value);
+  if (s.autoDetectAnswerKey) detectAnswerKey(editor.value);
   editor.focus();
 }
 

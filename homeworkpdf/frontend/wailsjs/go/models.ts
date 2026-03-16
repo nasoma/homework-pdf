@@ -13,6 +13,7 @@ export namespace pdf {
 	    footerEnabled: boolean;
 	    footerText: string;
 	    customCSS: string;
+	    unwrapFence: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Settings(source);
@@ -32,6 +33,7 @@ export namespace pdf {
 	        this.footerEnabled = source["footerEnabled"];
 	        this.footerText = source["footerText"];
 	        this.customCSS = source["customCSS"];
+	        this.unwrapFence = source["unwrapFence"];
 	    }
 	}
 

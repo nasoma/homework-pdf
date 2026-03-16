@@ -10,10 +10,10 @@ export function SavePDF(arg1, arg2) {
   return window['go']['main']['App']['SavePDF'](arg1, arg2);
 }
 
-export function SuggestedFilename(arg1) {
-  return window['go']['main']['App']['SuggestedFilename'](arg1);
-}
-
 export function SaveToDownloads(arg1, arg2) {
   return window['go']['main']['App']['SaveToDownloads'](arg1, arg2);
+}
+
+export function SuggestedFilename(arg1) {
+  return window['go']['main']['App']['SuggestedFilename'](arg1);
 }
