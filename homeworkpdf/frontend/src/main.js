@@ -499,7 +499,8 @@ async function handleExportBoth() {
   const studentFilename = `${slug}-student.pdf`;
   const answersFilename = `${slug}-answers.pdf`;
   const exportStudentMd = buildWithTitle(studentMd, title);
-  const exportAnswersMd = buildWithTitle(answersMd, title);
+  const answersTitle = title ? `${title} - Answers` : 'Answers';
+  const exportAnswersMd = buildWithTitle(answersMd, answersTitle);
 
   exportBtn.classList.add('loading');
   exportBtn.textContent = 'Generating…';
